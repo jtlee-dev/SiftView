@@ -6,8 +6,8 @@ See [projectOverview.md](./projectOverview.md) for the product vision and [PLAN.
 
 ## Try it
 
-- **Desktop app** — Download the latest [Release](https://github.com/YOUR_USERNAME/SiftView/releases) for your OS, or build from source below.
-- **In your browser** — If this repo has GitHub Pages enabled, open **https://YOUR_USERNAME.github.io/SiftView/** to use the web version (Open via file picker, Save as download, Format, Diff, Copy). No install required.
+- **Desktop app** — Download the latest [Release](https://github.com/jtlee-dev/SiftView/releases) for your OS, or build from source below.
+- **In your browser** — If this repo has GitHub Pages enabled, open **https://jtlee-dev.github.io/SiftView/** to use the web version (Open via file picker, Save as download, Format, Diff, Copy). No install required.
 
 ## Getting ready for GitHub
 
@@ -18,7 +18,7 @@ See [projectOverview.md](./projectOverview.md) for the product vision and [PLAN.
    git add .
    git commit -m "Initial commit"
    git branch -M main
-   git remote add origin https://github.com/YOUR_USERNAME/SiftView.git
+   git remote add origin https://github.com/jtlee-dev/SiftView.git
    git push -u origin main
    ```
 
