@@ -15,6 +15,7 @@ vi.mock("./core/tauriBridge", () => ({
   writeText: vi.fn(() => Promise.resolve()),
   registerShortcut: vi.fn(() => Promise.resolve()),
   unregisterShortcut: vi.fn(() => Promise.resolve()),
+  getAppVersion: vi.fn(() => Promise.resolve("0.1.0")),
 }));
 
 // EditorPane uses CodeMirror which is heavy for unit tests; mock it.
@@ -79,9 +80,7 @@ describe("App", () => {
     const closeBtn = screen.getByRole("button", { name: /close untitled/i });
     await user.click(closeBtn);
     expect(screen.getByText(/No tab open/)).toBeInTheDocument();
-    await user.click(screen.getByRole("button", { name: /more actions/i }));
-    const restoreBtn = screen.getByRole("menuitem", { name: /restore closed tab/i });
-    await user.click(restoreBtn);
+    await user.click(screen.getByRole("button", { name: /restore closed tab/i }));
     expect(screen.queryByText(/No tab open/)).not.toBeInTheDocument();
     expect(screen.getByTestId("editor-content")).toHaveTextContent("edited");
   });

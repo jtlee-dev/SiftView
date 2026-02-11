@@ -104,16 +104,16 @@ export function TabBar({
               </button>
             </div>
           ))}
+          <button
+            type="button"
+            className="new-tab"
+            onClick={onNew}
+            aria-label="New tab (Ctrl+N)"
+            title="New tab"
+          >
+            +
+          </button>
         </div>
-        <button
-          type="button"
-          className="new-tab"
-          onClick={onNew}
-          aria-label="New tab (Ctrl+N)"
-          title="New tab"
-        >
-          +
-        </button>
       </div>
 
       {/* Row 2: Toolbar — grouped actions */}
@@ -154,7 +154,7 @@ export function TabBar({
               className="toolbar-btn"
               onClick={onFormatClick}
               aria-label="Format"
-              title="Format (e.g. JSON)"
+              title="Format (JSON, CSV, XML, YAML, etc.)"
             >
               Format
             </button>
@@ -173,62 +173,99 @@ export function TabBar({
         </div>
 
         {hasMoreItems && (
-          <div className="toolbar-group toolbar-group-more" ref={moreRef}>
-            <button
-              type="button"
-              className="toolbar-btn toolbar-btn-more"
-              onClick={() => setMoreOpen((v) => !v)}
-              aria-label="More actions"
-              aria-expanded={moreOpen}
-              aria-haspopup="true"
-              title="More actions"
-            >
-              More ▾
-            </button>
-            {moreOpen && (
-              <div className="more-menu" role="menu">
-                {onDisplayFormattedClick != null && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className={`more-menu-item${displayFormattedActive ? " active" : ""}`}
-                    onClick={() => {
-                      onDisplayFormattedClick();
-                      setMoreOpen(false);
-                    }}
-                  >
-                    {displayFormattedActive ? "✓ " : ""}Display formatted
-                  </button>
-                )}
-                {onCloseAll != null && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="more-menu-item"
-                    onClick={() => {
-                      onCloseAll();
-                      setMoreOpen(false);
-                    }}
-                  >
-                    Close all tabs
-                  </button>
-                )}
-                {onRestoreClosed != null && (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="more-menu-item"
-                    onClick={() => {
-                      onRestoreClosed();
-                      setMoreOpen(false);
-                    }}
-                  >
-                    Restore closed tab
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
+          <>
+            <div className="toolbar-group toolbar-group-extra">
+              {onDisplayFormattedClick != null && (
+                <button
+                  type="button"
+                  className={`toolbar-btn${displayFormattedActive ? " active" : ""}`}
+                  onClick={onDisplayFormattedClick}
+                  aria-label="Display formatted"
+                  title="Display formatted"
+                >
+                  {displayFormattedActive ? "✓ " : ""}Display formatted
+                </button>
+              )}
+              {onCloseAll != null && (
+                <button
+                  type="button"
+                  className="toolbar-btn"
+                  onClick={onCloseAll}
+                  aria-label="Close all tabs"
+                  title="Close all tabs"
+                >
+                  Close all tabs
+                </button>
+              )}
+              {onRestoreClosed != null && (
+                <button
+                  type="button"
+                  className="toolbar-btn"
+                  onClick={onRestoreClosed}
+                  aria-label="Restore closed tab"
+                  title="Restore closed tab"
+                >
+                  Restore closed tab
+                </button>
+              )}
+            </div>
+            <div className="toolbar-group toolbar-group-more" ref={moreRef}>
+              <button
+                type="button"
+                className="toolbar-btn toolbar-btn-more"
+                onClick={() => setMoreOpen((v) => !v)}
+                aria-label="More actions"
+                aria-expanded={moreOpen}
+                aria-haspopup="true"
+                title="More actions"
+              >
+                More ▾
+              </button>
+              {moreOpen && (
+                <div className="more-menu" role="menu">
+                  {onDisplayFormattedClick != null && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className={`more-menu-item${displayFormattedActive ? " active" : ""}`}
+                      onClick={() => {
+                        onDisplayFormattedClick();
+                        setMoreOpen(false);
+                      }}
+                    >
+                      {displayFormattedActive ? "✓ " : ""}Display formatted
+                    </button>
+                  )}
+                  {onCloseAll != null && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="more-menu-item"
+                      onClick={() => {
+                        onCloseAll();
+                        setMoreOpen(false);
+                      }}
+                    >
+                      Close all tabs
+                    </button>
+                  )}
+                  {onRestoreClosed != null && (
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="more-menu-item"
+                      onClick={() => {
+                        onRestoreClosed();
+                        setMoreOpen(false);
+                      }}
+                    >
+                      Restore closed tab
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+          </>
         )}
       </div>
     </div>

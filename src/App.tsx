@@ -9,6 +9,7 @@ import {
   ask,
   registerShortcut,
   unregisterShortcut,
+  getAppVersion,
 } from "./core/tauriBridge";
 import { TabBar } from "./components/TabBar";
 import { EditorPane } from "./components/EditorPane";
@@ -106,6 +107,11 @@ export default function App() {
   const [formatPreview, setFormatPreview] = useState<{ formatted: string; tabId: string } | null>(null);
   const [recentlyClosed, setRecentlyClosed] = useState<{ tab: Tab; index: number }[]>([]);
   const [inspectorOpen, setInspectorOpen] = useState(false);
+  const [appVersion, setAppVersion] = useState<string | null>(null);
+
+  useEffect(() => {
+    getAppVersion().then(setAppVersion);
+  }, []);
 
   const MAX_RECENTLY_CLOSED = 10;
 
@@ -596,13 +602,15 @@ export default function App() {
           />
         )}
       </div>
-      <footer className="status-bar">
+      <footer className="status-bar" role="contentinfo">
         <span className="status-bar-left">
           {activeTab
             ? `${activeTab.label} · ${activeTab.state}${activeTab.detectedKind ? ` · ${activeTab.detectedKind}` : ""}`
             : "SiftView — viewer-first, editor-second"}
         </span>
-        <button
+        <span className="status-bar-right">
+          {appVersion != null && <span className="status-bar-version">v{appVersion}</span>}
+          <button
           type="button"
           className={`inspector-toggle${inspectorOpen ? " open" : ""}`}
           onClick={() => setInspectorOpen((v) => !v)}
@@ -611,6 +619,7 @@ export default function App() {
         >
           Inspector
         </button>
+        </span>
       </footer>
     </div>
   );

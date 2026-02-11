@@ -8,8 +8,8 @@ export function FormatPreviewModal({ formattedText, onApply, onCancel }: FormatP
   return (
     <div className="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="format-preview-title">
       <div className="modal-content format-preview-modal">
-        <h2 id="format-preview-title" className="modal-title">Format JSON — Preview</h2>
-        <p className="format-preview-hint">Preview pretty-printed JSON. Apply to replace the tab content.</p>
+        <h2 id="format-preview-title" className="modal-title">Format — Preview</h2>
+        <p className="format-preview-hint">Preview formatted content (JSON, CSV, XML, YAML, etc.). Apply to replace the tab content.</p>
         <div className="format-preview-body">
           <pre className="format-preview-text">{formattedText}</pre>
         </div>

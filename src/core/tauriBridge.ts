@@ -13,6 +13,14 @@ export function isTauri(): boolean {
   return typeof window !== "undefined" && !!window.__TAURI__;
 }
 
+export async function getAppVersion(): Promise<string> {
+  if (isTauri()) {
+    const { getVersion } = await import("@tauri-apps/api/app");
+    return getVersion();
+  }
+  return typeof __APP_VERSION__ !== "undefined" ? __APP_VERSION__ : "0.0.0";
+}
+
 // --- invoke: use Tauri when available, else web implementations
 export async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   if (isTauri()) {
