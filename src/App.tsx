@@ -73,11 +73,6 @@ interface DetectedType {
   confidence: number;
 }
 
-let tabIdCounter = 0;
-function nextTabId(): string {
-  return `tab-${++tabIdCounter}`;
-}
-
 function defaultLabel(id: string): string {
   return `Untitled-${id.replace("tab-", "")}`;
 }
@@ -94,14 +89,17 @@ export function unifiedDiffWithLabels(unified: string, leftLabel: string, rightL
 }
 
 export default function App() {
-  const [tabs, setTabs] = useState<Tab[]>(() => [
-    {
-      id: nextTabId(),
-      label: defaultLabel("1"),
-      content: "",
-      state: "ephemeral",
-    },
-  ]);
+  const tabIdRef = useRef(2); // 1 used for initial tab
+  const nextTabId = useCallback(() => {
+    const id = tabIdRef.current;
+    tabIdRef.current += 1;
+    return `tab-${id}`;
+  }, []);
+
+  const [tabs, setTabs] = useState<Tab[]>(() => {
+    const id = "tab-1";
+    return [{ id, label: defaultLabel(id), content: "", state: "ephemeral" as const }];
+  });
   const [activeId, setActiveId] = useState<string | null>(tabs[0]?.id ?? null);
   const [showDiffPicker, setShowDiffPicker] = useState(false);
   const [formatPreview, setFormatPreview] = useState<{ formatted: string; tabId: string } | null>(null);
@@ -129,6 +127,17 @@ export default function App() {
 
   const addTabRef = useRef(addTab);
   addTabRef.current = addTab;
+
+  const reorderTabs = useCallback((fromIndex: number, toIndex: number) => {
+    if (fromIndex === toIndex) return;
+    setTabs((t) => {
+      const next = [...t];
+      const [removed] = next.splice(fromIndex, 1);
+      const insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
+      next.splice(insertIndex, 0, removed);
+      return next;
+    });
+  }, []);
 
   useEffect(() => {
     let mounted = true;
@@ -519,6 +528,7 @@ export default function App() {
         onCloseAll={tabs.length > 0 ? closeAllTabs : undefined}
         onPinToggle={toggleTabPin}
         onCopy={activeTab ? copyActiveTabToClipboard : undefined}
+        onReorderTabs={reorderTabs}
       />
       {formatPreview && (
         <FormatPreviewModal

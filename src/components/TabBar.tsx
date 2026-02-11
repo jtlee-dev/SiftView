@@ -1,5 +1,8 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import type { Tab } from "../App";
+
+/** Drag threshold in pixels before treating as drag (not click). */
+const DRAG_THRESHOLD = 5;
 
 interface TabBarProps {
   tabs: Tab[];
@@ -7,6 +10,7 @@ interface TabBarProps {
   onSelect: (id: string) => void;
   onClose: (id: string) => void;
   onNew: () => void;
+  onReorderTabs?: (fromIndex: number, toIndex: number) => void;
   onOpen?: () => void;
   onDiffClick?: () => void;
   onRestoreClosed?: () => void;
@@ -26,6 +30,7 @@ export function TabBar({
   onSelect,
   onClose,
   onNew,
+  onReorderTabs,
   onOpen,
   onDiffClick,
   onRestoreClosed,
@@ -40,6 +45,67 @@ export function TabBar({
 }: TabBarProps) {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreRef = useRef<HTMLDivElement>(null);
+  const [draggingFromIndex, setDraggingFromIndex] = useState<number | null>(null);
+  const didDragRef = useRef(false);
+
+  const getTabIndexAt = useCallback((clientX: number, clientY: number): number => {
+    const el = document.elementFromPoint(clientX, clientY);
+    if (!el) return -1;
+    const tab = el.closest("[data-tab-index]");
+    return tab != null ? parseInt((tab as HTMLElement).dataset.tabIndex ?? "-1", 10) : -1;
+  }, []);
+
+  const handleTabMouseDown = useCallback(
+    (e: React.MouseEvent, index: number) => {
+      if (onReorderTabs == null) return;
+      if ((e.target as HTMLElement).closest("button")) return;
+      e.preventDefault();
+      const startX = e.clientX;
+      const startY = e.clientY;
+      let started = false;
+      let lastHoverIndex = index;
+
+      const handleMove = (ev: MouseEvent) => {
+        const dx = ev.clientX - startX;
+        const dy = ev.clientY - startY;
+        if (!started && (dx * dx + dy * dy > DRAG_THRESHOLD * DRAG_THRESHOLD)) {
+          started = true;
+          didDragRef.current = true;
+          setDraggingFromIndex(index);
+        }
+        if (started) {
+          const idx = getTabIndexAt(ev.clientX, ev.clientY);
+          if (idx >= 0) lastHoverIndex = idx;
+        }
+      };
+      const handleUp = (ev: MouseEvent) => {
+        if (started) {
+          const idx = getTabIndexAt(ev.clientX, ev.clientY);
+          const toIndex = idx >= 0 ? idx : lastHoverIndex;
+          if (toIndex >= 0 && toIndex !== index) {
+            onReorderTabs(index, toIndex);
+          }
+          setDraggingFromIndex(null);
+        }
+        document.removeEventListener("mousemove", handleMove);
+        document.removeEventListener("mouseup", handleUp);
+      };
+      document.addEventListener("mousemove", handleMove);
+      document.addEventListener("mouseup", handleUp);
+    },
+    [onReorderTabs, getTabIndexAt],
+  );
+
+  const handleTabClick = useCallback(
+    (id: string) => {
+      if (didDragRef.current) {
+        didDragRef.current = false;
+        return;
+      }
+      onSelect(id);
+    },
+    [onSelect],
+  );
 
   useEffect(() => {
     if (!moreOpen) return;
@@ -60,13 +126,16 @@ export function TabBar({
       {/* Row 1: Tab strip — tabs get space, + at end */}
       <div className="tab-strip">
         <div className="tab-strip-scroll" role="tablist">
-          {tabs.map((tab) => (
+          {tabs.map((tab, index) => (
             <div
               key={tab.id}
               role="tab"
               tabIndex={0}
-              className={`tab ${tab.id === activeId ? "active" : ""}`}
-              onClick={() => onSelect(tab.id)}
+              data-index={index}
+              data-tab-index={index}
+              className={`tab ${tab.id === activeId ? "active" : ""} ${draggingFromIndex === index ? "tab-dragging" : ""} ${onReorderTabs != null ? "tab-reorderable" : ""}`}
+              onClick={() => handleTabClick(tab.id)}
+              onMouseDown={(e) => handleTabMouseDown(e, index)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" || e.key === " ") {
                   e.preventDefault();
@@ -80,6 +149,7 @@ export function TabBar({
                   className={`tab-pin${tab.pinned ? " pinned" : ""}`}
                   aria-label={tab.pinned ? "Unpin tab" : "Pin tab"}
                   title={tab.pinned ? "Unpin" : "Pin (prompt when closing)"}
+                  draggable={false}
                   onClick={(e) => {
                     e.stopPropagation();
                     onPinToggle(tab.id);
@@ -95,6 +165,7 @@ export function TabBar({
                 type="button"
                 className="close"
                 aria-label={`Close ${tab.label}`}
+                draggable={false}
                 onClick={(e) => {
                   e.stopPropagation();
                   onClose(tab.id);

@@ -59,6 +59,19 @@
   margin-bottom: -1px;
 }
 
+.tab.tab-reorderable {
+  cursor: grab;
+  user-select: none;
+}
+
+.tab.tab-reorderable:active {
+  cursor: grabbing;
+}
+
+.tab.tab-dragging {
+  opacity: 0.5;
+}
+
 .tab .label {
   flex: 1;
   overflow: hidden;
