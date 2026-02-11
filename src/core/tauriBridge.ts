@@ -35,7 +35,9 @@ function webInvoke(cmd: string, args: Record<string, unknown>): Promise<unknown>
     case "format_json":
       return Promise.resolve(webFormatJson(String(args.content ?? "")));
     case "format_content_segmented":
-      return Promise.resolve(webFormatContentSegmented(String(args.content ?? ""), (args.segments as { kind: string }[]) ?? []));
+      return Promise.resolve(
+        webFormatContentSegmented(String(args.content ?? ""), (args.segments as { start_line: number; end_line: number; kind: string }[]) ?? [])
+      );
     case "compute_diff":
       return Promise.resolve(webComputeDiff(String(args.left ?? ""), String(args.right ?? "")));
     case "compute_diff_structured":
@@ -237,7 +239,8 @@ export async function saveDialog(options?: { defaultPath?: string }): Promise<st
 export async function messageDialog(message: string, _options?: { title?: string; kind?: string }): Promise<void> {
   if (isTauri()) {
     const { message: msg } = await import("@tauri-apps/plugin-dialog");
-    return msg(message, _options ?? {});
+    await msg(message, _options as Record<string, unknown>);
+    return;
   }
   window.alert(message);
 }
@@ -248,7 +251,7 @@ export async function ask(
 ): Promise<boolean> {
   if (isTauri()) {
     const { ask: askDialog } = await import("@tauri-apps/plugin-dialog");
-    return askDialog(message, _options ?? {});
+    return askDialog(message, _options as Record<string, unknown>);
   }
   return window.confirm(message);
 }

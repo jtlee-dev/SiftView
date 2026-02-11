@@ -16,7 +16,7 @@ export function DiffPickerModal({
   onRun,
 }: DiffPickerModalProps) {
   const editableTabs = tabs.filter((t) => !t.diffData);
-  const defaultLeft = editableTabs.some((t) => t.id === activeId) ? activeId : editableTabs[0]?.id ?? "";
+  const defaultLeft = (editableTabs.some((t) => t.id === activeId) ? activeId : editableTabs[0]?.id) ?? "";
   const rightId = CLIPBOARD_ID;
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -54,7 +54,7 @@ export function DiffPickerModal({
           </div>
           <div className="diff-picker-row">
             <label htmlFor="diff-right">Right</label>
-            <select id="diff-right" name="diff-right" defaultValue={rightId} className="diff-picker-select">
+            <select id="diff-right" name="diff-right" defaultValue={rightId ?? ""} className="diff-picker-select">
               <option value={CLIPBOARD_ID}>Clipboard</option>
               {editableTabs.map((tab) => (
                 <option key={tab.id} value={tab.id}>

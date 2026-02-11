@@ -63,7 +63,7 @@ describe("TabBar", () => {
     const user = userEvent.setup();
     const tabs = [tab("a", "First"), tab("b", "Second")];
     const { onSelect, onClose } = renderTabBar({ tabs, activeId: "a" });
-    const firstTab = screen.getByText("First").closest("[role='tab']")!;
+    const firstTab = screen.getByText("First").closest("[role='tab']")! as HTMLElement;
     const closeBtn = within(firstTab).getByRole("button", { name: /close first/i });
     await user.click(closeBtn);
     expect(onClose).toHaveBeenCalledWith("a");

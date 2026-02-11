@@ -150,7 +150,7 @@ describe("App", () => {
     const user = userEvent.setup();
     const { invoke, readText } = await import("./core/tauriBridge");
     vi.mocked(readText).mockResolvedValueOnce("clipboard\ncontent");
-    vi.mocked(invoke).mockImplementation((cmd: string, args: { left?: string; right?: string }) =>
+    vi.mocked(invoke).mockImplementation((cmd: string) =>
       cmd === "compute_diff_structured"
         ? Promise.resolve({
             left_label: "current",
@@ -159,8 +159,8 @@ describe("App", () => {
               { type: "unchanged", count: 0, lines: [] },
               { type: "changed", old_lines: ["edited"], new_lines: ["clipboard", "content"] },
             ],
-          } as never)
-        : Promise.resolve("" as never)
+          })
+        : Promise.resolve("")
     );
 
     render(<App />);
