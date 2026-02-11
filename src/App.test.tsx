@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import App from "./App";
+import App, { unifiedDiffWithLabels } from "./App";
 
 // Bridge (Tauri vs web) is mocked so tests run without Tauri.
 vi.mock("./core/tauriBridge", () => ({
@@ -179,5 +179,76 @@ describe("App", () => {
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     expect(screen.getByRole("tab", { name: /Diff: Untitled-1 vs Clipboard/i })).toBeInTheDocument();
     expect(screen.getByText("edited")).toBeInTheDocument();
+  });
+
+  describe("unifiedDiffWithLabels", () => {
+    it("rewrites --- current and +++ clipboard to given labels", () => {
+      const unified = "--- current\n+++ clipboard\n\n@@ -1,2 +1,2 @@\n-a\n+b";
+      const out = unifiedDiffWithLabels(unified, "Left.txt", "Right.txt");
+      expect(out).toContain("--- Left.txt");
+      expect(out).toContain("+++ Right.txt");
+      expect(out).not.toContain("--- current");
+      expect(out).not.toContain("+++ clipboard");
+      expect(out).toContain("@@ -1,2 +1,2 @@");
+    });
+
+    it("returns unchanged string when first line does not start with --- ", () => {
+      const unified = "not a diff header\n+++ clipboard\n";
+      expect(unifiedDiffWithLabels(unified, "A", "B")).toBe(unified);
+    });
+
+    it("returns unchanged string when second line does not start with +++ ", () => {
+      const unified = "--- current\nnot plus plus\n";
+      expect(unifiedDiffWithLabels(unified, "A", "B")).toBe(unified);
+    });
+
+    it("returns unchanged string when there are fewer than two lines", () => {
+      expect(unifiedDiffWithLabels("--- current", "A", "B")).toBe("--- current");
+      expect(unifiedDiffWithLabels("", "A", "B")).toBe("");
+    });
+
+    it("preserves rest of diff body after header", () => {
+      const unified = "--- current\n+++ clipboard\n\nbody\nlines";
+      const out = unifiedDiffWithLabels(unified, "L", "R");
+      expect(out).toBe("--- L\n+++ R\n\nbody\nlines");
+    });
+  });
+
+  it("inline diff view shows actual left/right labels instead of current and clipboard", async () => {
+    const user = userEvent.setup();
+    const { invoke } = await import("./core/tauriBridge");
+    const rawUnified = "--- current\n+++ clipboard\n\n@@ -1,1 +1,1 @@\n-old\n+new";
+    vi.mocked(invoke).mockImplementation((cmd: string) => {
+      if (cmd === "compute_diff_structured")
+        return Promise.resolve({
+          left_label: "current",
+          right_label: "clipboard",
+          blocks: [{ type: "unchanged", count: 0, lines: [] }, { type: "changed", old_lines: ["old"], new_lines: ["new"] }],
+        });
+      if (cmd === "compute_diff") return Promise.resolve(rawUnified);
+      return Promise.resolve("");
+    });
+
+    render(<App />);
+    await user.click(screen.getByRole("button", { name: /type something/i }));
+    await user.click(screen.getByRole("button", { name: /^diff$/i }));
+    const dialog = screen.getByRole("dialog");
+    const leftSelect = within(dialog).getByLabelText(/left/i);
+    const tabOptionValue = within(leftSelect).getAllByRole("option")[0].getAttribute("value")!;
+    await user.selectOptions(leftSelect, tabOptionValue);
+    const rightSelect = within(dialog).getByLabelText(/right/i);
+    await user.selectOptions(rightSelect, tabOptionValue);
+    await user.click(within(dialog).getByRole("button", { name: /^show diff$/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: /Diff: Untitled-1 vs Untitled-1/i })).toBeInTheDocument();
+    });
+    await user.click(screen.getByRole("button", { name: /^inline$/i }));
+
+    const editorContent = screen.getByTestId("editor-content").textContent;
+    expect(editorContent).toContain("--- Untitled-1");
+    expect(editorContent).toContain("+++ Untitled-1");
+    expect(editorContent).not.toContain("--- current");
+    expect(editorContent).not.toContain("+++ clipboard");
   });
 });

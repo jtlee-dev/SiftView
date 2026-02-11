@@ -81,6 +81,17 @@ function defaultLabel(id: string): string {
   return `Untitled-${id.replace("tab-", "")}`;
 }
 
+/** Rewrite unified diff header to use actual left/right labels instead of backend defaults. */
+export function unifiedDiffWithLabels(unified: string, leftLabel: string, rightLabel: string): string {
+  const lines = unified.split("\n");
+  if (lines.length >= 2 && lines[0].startsWith("--- ") && lines[1].startsWith("+++ ")) {
+    lines[0] = `--- ${leftLabel}`;
+    lines[1] = `+++ ${rightLabel}`;
+    return lines.join("\n");
+  }
+  return unified;
+}
+
 export default function App() {
   const [tabs, setTabs] = useState<Tab[]>(() => [
     {
@@ -177,7 +188,7 @@ export default function App() {
     if (!tab) return;
     const text =
       tab.diffData && tab.diffViewMode === "inline" && tab.diffUnified != null
-        ? tab.diffUnified
+        ? unifiedDiffWithLabels(tab.diffUnified, tab.diffData.left_label, tab.diffData.right_label)
         : tab.content;
     try {
       await writeText(text);
@@ -544,7 +555,11 @@ export default function App() {
                   {activeTab.diffViewMode === "inline" && activeTab.diffUnified != null ? (
                     <EditorPane
                       key={`${activeTab.id}-inline-diff`}
-                      content={activeTab.diffUnified}
+                      content={unifiedDiffWithLabels(
+                        activeTab.diffUnified,
+                        activeTab.diffData.left_label,
+                        activeTab.diffData.right_label
+                      )}
                       onChange={() => {}}
                       language="diff"
                       readOnly
