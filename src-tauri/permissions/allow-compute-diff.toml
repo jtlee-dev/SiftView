@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-compute-diff"
+description = "Enables the compute_diff command to generate unified diffs between two strings."
+commands.allow = ["compute_diff", "compute_diff_structured"]

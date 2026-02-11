@@ -1,0 +1,8 @@
+Plain text file for SiftView.
+
+Use this to test:
+- Open / Save
+- Diff (compare with another tab or clipboard)
+- Inspector (path, type, lines)
+
+No structure — format/display formatted will treat as text or try heuristics.

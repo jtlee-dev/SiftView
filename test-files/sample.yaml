@@ -1,0 +1,10 @@
+name: SiftView Test
+version: 0.1.0
+features:
+  - open
+  - save
+  - diff
+  - format
+config:
+  maxFileSizeMB: 5
+  theme: system

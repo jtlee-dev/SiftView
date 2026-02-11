@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-detect-content"
+description = "Enables the detect_content command for content-type detection."
+commands.allow = ["detect_content", "detect_segments"]

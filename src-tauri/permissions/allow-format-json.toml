@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-format-json"
+description = "Enables the format_json command to pretty-print JSON content."
+commands.allow = ["format_json", "format_content_segmented"]

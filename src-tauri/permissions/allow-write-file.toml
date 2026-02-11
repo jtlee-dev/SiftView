@@ -1,0 +1,4 @@
+[[permission]]
+identifier = "allow-write-file"
+description = "Enables the write_file command to write content to a path (used for Save / Save As)."
+commands.allow = ["write_file"]

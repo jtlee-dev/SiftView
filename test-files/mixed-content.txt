@@ -1,0 +1,6 @@
+Log output:
+{"level":"info","msg":"started","ts":1234567890}
+Some plain text in between.
+{"level":"error","msg":"failed","code":500}
+
+Use Format or Display formatted to pretty-print only the JSON lines.
