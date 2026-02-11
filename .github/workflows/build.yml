@@ -50,16 +50,16 @@ jobs:
         run: npm ci
 
       - name: Build Tauri app
-        run: npm run tauri build
+        run: npm run tauri build -- --target ${{ matrix.target }}
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
 
       - name: Upload artifacts (macOS)
-        if: matrix.platform == 'macos-latest' && matrix.target == 'aarch64-apple-darwin'
+        if: matrix.platform == 'macos-latest'
         uses: actions/upload-artifact@v4
         with:
-          name: siftview-darwin-aarch64
+          name: siftview-darwin-${{ matrix.target == 'aarch64-apple-darwin' && 'aarch64' || 'x64' }}
           path: src-tauri/target/${{ matrix.target }}/release/bundle/
 
       - name: Upload artifacts (Windows)
